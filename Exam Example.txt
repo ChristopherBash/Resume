@@ -1,0 +1,162 @@
+Router #1 
+R1(config)#int Loopback0 
+R1(config)#ip address 10.52.0.1 255.255.225.248
+R1(config)#ip ospf network point-to-point
+R1(config)#ip ospf priority 1 
+R1(config)#exit
+R1(config)#int g0/0/0
+R1(config)#ip address 10.67.254.2 255.255.255.252
+R1(config)#ip ospf hello-interval 30
+R1(config)#duplex auto
+R1(config)#speed auto
+R1(config)#exit
+R1(config)#int g0/0/1
+R1(config)#ip address 192.168.1.1 255.255.255.0
+R1(config)#int vlan1 
+R1(config)#no ip address 
+R1(config)#shutdown
+R1(config)#router ospf 1 
+R1(config)#router-id 0.0.0.1
+R1(config)#log adjacency-changes 
+R1(config)#passive-interface g0/0/1
+R1(config)#passive-interface Loopback0
+R1(config)#auto-cost reference-bandwidth 1000
+R1(config)#network 10.67.254.0 0.0.0.3 area 0
+R1(config)#network 10.52.0.0 0.0.0.7 area 0
+R1(config)#network 192.168.1.0 0.0.0.255 area 0
+R1(config)#ip classless 
+R1(config)#ip flow-export version 9
+R1(config)#line vty 0 4 
+R1(config)#login local
+R1(config)#transport input ssh 
+R1# copy running-config startup-config 
+
+
+Router#2 
+R2(config)#int Loopback0
+R2(config)#ip address 209.165.201.1 255.255.255.224
+R2(config)#Ip ospf network point-to-point
+R2(config)#ip ospf priority 1  
+R2(config)#no shut
+R2(config)#exit
+R2(config)# int g0/0/0
+R2(config)# ip address 10.67.254.1 255.255.255.252
+R2(config)#ip ospf hello-interval 30
+R2(config)#ip ospf priority 50
+R2(config)#ip access-group R2-SECURITY in
+R2(config)#duplex auto 
+R2(config)#speed auto
+R2(config)#exit
+R2(config)#int g0/0/1
+R2(config)#ip address 10.67.1.1 255.255.255.0
+R2(config)#duplex auto
+R2(config)#speed auto
+R2(config)#exit
+R2(config)#int Vlan1
+R2(config)#no ip address
+R2(config)#shut
+R2(config)#exit
+R2(config)#router ospf 1
+R2(config)#router-id 0.0.0.2
+R2(config)#log-adjacency-changes
+R2(config)#passive-interface g0/0/1
+R2(config)#passive-interface Loopback0
+R2(config)#auto-cost reference-bandwidth 1000
+R2(config)#network 10.67.254.0 0.0.0.3 area 0
+R2(config)#network 10.67.1.0 0.0.0.255 area 0
+R2(config)#default information originate 
+R2(config)#exit
+R2(config)#ip classless 
+R2(config)#ip route 0.0.0.0 0.0.0.0 Loopback0
+R2(config)#ip flow-export version 9
+R2(config)#ip access-list extended R2-SECURITY
+R2(config)#deny tcp any host 209.165.201.1 eq 443
+R2(config)#deny tcp any host 209.165.201.1 eq 22
+R2(config)#permit ip any any 
+R2# copy running-config startup-config 
+
+
+Router> enable  
+Router# config t  
+Router (config)# hostname ________  
+R1 (config)# no ip domain lookup  
+R1 (config)# line console 0  
+R1 (config-line) # Password _______  
+R1 (config-line) # login  
+R1 (config)# line vty   0 15  
+R1 (config-line) # password ________  
+R1 (config-line) # login  
+R1 (config-line) # enable secret ______  
+R1 (config)# service password-encryption  
+R1 (config)# security password min-length 10  
+R1 (config)# banner motd “WARNING: This system is for the use of Authorized Clients Only.”  
+R1 (config)# exit  
+R1# clock set hours:min:sec Day Month Year  
+R1# copy running-config startup-config 
+
+Switch#1
+S1(config)#int vlan 1 
+S1(config)#ip address 192.168.1.2 255.255.255.0
+S1(config)#no shut
+S1(config)#ip default-gateway 192.168.1.1
+S1(config)#int g1/0/1-4
+S1(config)#shutdown 
+S1(config)#int g1/0/7-8 
+S1(config)#shutdown 
+S1(config)#ip ssh version 2
+S1(config)#no ip domain lookup
+S1(config)#spanning –tree mode pvst 
+S1(config)#line vty 0 4
+S1(config)#login local
+S1(config)#transport input ssh 
+S1(config)#line vty 5 15
+S1(config)#login 
+ 
+S1# copy running-config startup-config
+
+Switch#2 
+S1(config)#int vlan 1 
+S1(config)#ip address 10.67.1.2 255.255.255.0
+S1(config)#no shut
+S1(config)#ip default-gateway 10.67.1.1
+S1(config)#int g1/0/1-4
+S1(config)#shutdown 
+S1(config)#int g1/0/7-8 
+S1(config)#shutdown 
+S1(config)#ip ssh version 2
+S1(config)#no ip domain-lookup
+S1(config)#spanning –tree mode pvst 
+S2(config)#spanning-tree extend system-id
+S1(config)#line vty 0 4
+S1(config)#login local
+S1(config)#transport input ssh 
+S1(config)#line vty 5 15
+S1(config)#login 
+ 
+S1# copy running-config startup-config
+
+
+S1# copy running-config startup-config   
+
+Switch> enable  
+Switch# config t  
+Switch (config)# hostname ________  
+S1 (config)# no ip domain lookup  
+S1 (config)# line console 0  
+S1 (config-line) # Password _______  
+S1 (config-line) # login  
+S1 (config)# line vty   0 15  
+S1 (config-line) # password ________  
+S1 (config-line) # login  
+S1 (config-line) # enable secret ______  
+S1 (config)# service password-encryption  
+S1 (config)# security password min-length 10  
+S1 (config)# banner motd “WARNING: This system is for the use of Authorized Clients Only.”  
+S1 (config)# exit  
+S1# clock set hours:min:sec Day Month Year  
+S1# copy running-config startup-config 
+
+
+
+
+
